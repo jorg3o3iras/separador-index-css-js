@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Separador de Arquivos HTML/CSS/JS - PRO v2.2.3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7fc; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+        .container { max-width: 1400px; width: 100%; background: #fff; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.08); padding: 40px; margin-top: 20px; }
+        h1 { font-size: 28px; font-weight: 700; color: #1a2634; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        h1 small { font-size: 16px; font-weight: 400; color: #5b6f82; margin-left: 8px; }
+        .badge-pro { background: linear-gradient(135deg, #9b59b6, #e74c3c); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; letter-spacing: 1px; }
+        .subtitle { color: #5b6f82; margin-bottom: 30px; font-size: 15px; border-left: 4px solid #4a90d9; padding-left: 16px; background: #f8faff; border-radius: 0 8px 8px 0; line-height: 1.6; }
+        .header-actions { display: flex; gap: 12px; margin-left: auto; flex-wrap: wrap; }
+
+        .upload-area { border: 3px dashed #cbd5e1; border-radius: 16px; padding: 50px 20px; text-align: center; cursor: pointer; transition: all .25s; background: #fafcff; margin-bottom: 30px; position: relative; }
+        .upload-area:hover { border-color: #4a90d9; background: #f0f6ff; }
+        .upload-area.dragover { border-color: #4a90d9; background: #e6f0ff; transform: scale(1.01); }
+        .upload-icon { font-size: 64px; margin-bottom: 12px; display: block; }
+        .upload-area p { color: #2c3e50; font-size: 18px; font-weight: 500; }
+        .upload-area .highlight { color: #4a90d9; font-weight: 600; }
+        .upload-area .sub-text { font-size: 14px; color: #94a3b8; margin-top: 8px; }
+        .upload-area input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+        .upload-btn-wrapper { text-align: center; margin-bottom: 30px; }
+        .btn-upload { background: #4a90d9; color: #fff; border: none; padding: 14px 40px; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all .3s; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(74,144,217,.3); }
+        .btn-upload:hover { background: #357abd; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(74,144,217,.4); }
+
+        .options-panel { background: linear-gradient(135deg, #f0f6ff, #f8faff); border: 2px solid #dbeafe; border-radius: 16px; padding: 20px 24px; margin-bottom: 30px; }
+        .options-title { font-size: 14px; font-weight: 700; color: #1a2634; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+        .option-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fff; border-radius: 10px; cursor: pointer; transition: all .2s; border: 1px solid #e9edf4; }
+        .option-item:hover { border-color: #4a90d9; box-shadow: 0 2px 10px rgba(74,144,217,.1); }
+        .option-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #4a90d9; }
+        .option-item label { font-size: 13px; color: #2c3e50; cursor: pointer; font-weight: 500; flex: 1; }
+        .option-item .option-hint { font-size: 11px; color: #94a3b8; font-weight: 400; display: block; margin-top: 2px; }
+
+        .name-field-panel { background: #f8fafc; border: 2px solid #e9edf4; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; }
+        .name-field-title { font-size: 13px; font-weight: 700; color: #1a2634; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .name-field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .name-field-grid .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .name-field-grid .form-group label { font-size: 11px; font-weight: 600; color: #5b6f82; text-transform: uppercase; letter-spacing: .5px; }
+        .name-field-grid .form-group input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; transition: all .2s; }
+        .name-field-grid .form-group input:focus { outline: none; border-color: #4a90d9; box-shadow: 0 0 0 3px rgba(74,144,217,.1); }
+
+        .file-info { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 12px 20px; border-radius: 12px; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .file-info .name { font-weight: 600; color: #1a2634; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .file-info .name span { background: #e9edf4; padding: 2px 12px; border-radius: 30px; font-size: 12px; font-weight: 500; color: #2c3e50; }
+        .file-info .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .batch-info { display: flex; gap: 15px; font-size: 14px; color: #5b6f82; }
+        .batch-info .count { font-weight: 700; color: #4a90d9; }
+
+        .btn { padding: 10px 24px; border: none; border-radius: 30px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: #4a90d9; color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: #357abd; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(74,144,217,.3); }
+        .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-success { background: #2ecc71; color: #fff; }
+        .btn-success:hover:not(:disabled) { background: #27ae60; transform: translateY(-2px); }
+        .btn-success:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-danger { background: #e74c3c; color: #fff; }
+        .btn-warning { background: #f39c12; color: #fff; }
+        .btn-purple { background: #9b59b6; color: #fff; }
+        .btn-zip { background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; box-shadow: 0 4px 15px rgba(243,156,18,.3); }
+        .btn-zip:hover:not(:disabled) { background: linear-gradient(135deg, #e67e22, #d35400); transform: translateY(-2px); }
+        .btn-zip:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-sm { padding: 6px 16px; font-size: 13px; }
+
+        .code-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
+        @media (max-width: 1100px) { .code-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 700px) { .code-grid { grid-template-columns: 1fr; } }
+
+        .code-card { background: #fafcff; border-radius: 14px; border: 1px solid #e9edf4; overflow: hidden; display: flex; flex-direction: column; }
+        .code-card:hover { border-color: #cbd5e1; box-shadow: 0 8px 25px rgba(0,0,0,.04); }
+        .code-card .header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: #f4f7fc; border-bottom: 1px solid #e9edf4; flex-wrap: wrap; gap: 8px; }
+        .code-card .header .badge { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; padding: 4px 14px; border-radius: 30px; }
+        .badge-html { background: #e34f26; color: #fff; }
+        .badge-css { background: #2965f1; color: #fff; }
+        .badge-js { background: #f7df1e; color: #1a1a1a; }
+        .code-card .body { padding: 16px 18px 18px; flex: 1; overflow: auto; max-height: 400px; }
+        .code-card .body pre { font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 13px; line-height: 1.6; color: #1e293b; white-space: pre-wrap; word-break: break-word; }
+        .code-card .body .empty-message { color: #94a3b8; font-style: italic; font-size: 14px; }
+        .code-card .footer { padding: 12px 18px; border-top: 1px solid #e9edf4; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .code-card .footer .actions-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .batch-results { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e9edf4; display: none; }
+        .batch-results.show { display: block; }
+        .batch-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+        .batch-header h4 { color: #1a2634; }
+        .batch-active-info { font-size: 12px; color: #5b6f82; }
+        .batch-active-info strong { color: #4a90d9; }
+
+        .batch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #e9edf4; flex-wrap: wrap; gap: 10px; cursor: pointer; border-left: 3px solid transparent; transition: all .15s; }
+        .batch-item:last-child { border-bottom: none; }
+        .batch-item:hover { background: #f0f6ff; }
+        .batch-item.active { background: #e6f0ff; border-left-color: #4a90d9; }
+        .batch-item.failed { opacity: .6; cursor: not-allowed; }
+        .batch-item.failed:hover { background: transparent; }
+        .batch-item .batch-item-main { flex: 1; min-width: 0; }
+        .batch-item .batch-item-name { font-weight: 600; color: #1a2634; display: block; margin-bottom: 4px; }
+        .batch-item .status { display: flex; gap: 10px; font-size: 12px; flex-wrap: wrap; }
+        .batch-item .status .success { color: #27ae60; }
+        .batch-item .status .error { color: #e74c3c; }
+        .batch-item .status .info-tag { background: #e0f2fe; color: #0284c7; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .batch-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .mini-btn { background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 9px; font-size: 12px; cursor: pointer; color: #5b6f82; transition: all .15s; line-height: 1; }
+        .mini-btn:hover { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+        .mini-btn.danger:hover { background: #e74c3c; border-color: #e74c3c; }
+
+        .progress-container { width: 100%; height: 4px; background: #e9edf4; border-radius: 2px; margin: 10px 0; overflow: hidden; display: none; }
+        .progress-container.show { display: block; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #4a90d9, #2ecc71); width: 0%; transition: width .3s; border-radius: 2px; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.7); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: #fff; border-radius: 16px; width: 90%; max-width: 1200px; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid #e9edf4; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-size: 20px; color: #1a2634; }
+        .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #94a3b8; }
+        .modal-close:hover { color: #e74c3c; }
+        .modal-body { padding: 24px; overflow: auto; flex: 1; }
+        .modal-body iframe { width: 100%; height: 600px; border: none; border-radius: 8px; background: #fff; }
+
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #1a2634; color: #fff; padding: 16px 28px; border-radius: 12px; font-weight: 500; box-shadow: 0 10px 40px rgba(0,0,0,.2); transform: translateY(100px); opacity: 0; transition: all .4s; z-index: 999; max-width: 400px; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: #27ae60; }
+        .toast.error { background: #e74c3c; }
+        .toast.info { background: #4a90d9; }
+        .toast.warning { background: #f39c12; }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 22px; }
+            .file-info { flex-direction: column; align-items: stretch; }
+            .btn { padding: 8px 16px; font-size: 13px; }
+            .upload-area { padding: 30px 15px; }
+            .modal-content { width: 95%; }
+            .modal-body iframe { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <header>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+                <div>
+                    <h1>
+                        📄 Separador de Arquivos
+                        <small>HTML → CSS + JS</small>
+                        <span class="badge-pro">PRO v2.2.3</span>
+                    </h1>
+                    <div class="subtitle">
+                        Carregue um ou múltiplos arquivos <strong>.html</strong> com CSS e JavaScript embutidos.
+                        Extraia, visualize, edite, baixe individualmente ou em <strong>ZIP</strong>.
+                        <br>
+                        <span style="font-size:12px;color:#27ae60;">
+                            ✅ v2.2.3 — Corrigido bug do script quebrado (a tag de fechamento vazava dentro do código-fonte)
+                        </span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-purple btn-sm" id="btnToggleDebug">🐛 Debug</button>
+                    <button class="btn btn-warning btn-sm" id="btnClearAll">🗑️ Limpar Tudo</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="upload-btn-wrapper">
+            <button class="btn-upload" id="btnUpload">📂 Selecionar Arquivo(s) HTML</button>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <span class="upload-icon">📁</span>
+            <p><span class="highlight">Arraste</span> seus arquivos HTML aqui</p>
+            <p class="sub-text">ou clique no botão acima para selecionar (múltiplos permitidos)</p>
+            <input type="file" id="fileInput" accept=".html,.htm" multiple />
+        </div>
+
+        <div class="options-panel">
+            <div class="options-title"><i class="fas fa-cog" style="color:#4a90d9;"></i> Opções de Processamento</div>
+            <div class="options-grid">
+                <div class="option-item">
+                    <input type="checkbox" id="optInsertLinks" checked>
+                    <label for="optInsertLinks">Inserir links no HTML
+                        <span class="option-hint">Adiciona <code>&lt;link&gt;</code> e <code>&lt;script&gt;</code> automaticamente</span>
+                    </label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="optPreserveExternal" checked>
+                    <label for="optPreserveExternal">Preservar scripts externos
+                        <span class="option-hint">Mantém <code>&lt;script src="CDN"&gt;</code> no HTML</span>
+                    </label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="optPreserveSpecialScripts" checked>
+                    <label for="optPreserveSpecialScripts">Preservar JSON-LD e tipos especiais
+                        <span class="option-hint">Mantém <code>ld+json</code>, <code>text/template</code>, etc.</span>
+                    </label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="optMinify">
+                    <label for="optMinify">Minificar CSS e JS
+                        <span class="option-hint">Modo seguro com tokenizer</span>
+                    </label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="optAddHeader">
+                    <label for="optAddHeader">Adicionar cabeçalho aos arquivos
+                        <span class="option-hint">Inclui comentário com nome e data</span>
+                    </label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="optFileName">
+                    <label for="optFileName">Nome personalizado
+                        <span class="option-hint">Marcado: usa os nomes abaixo. Desmarcado: usa o nome original do arquivo</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="name-field-panel" id="nameFieldPanel" style="display:none;">
+            <div class="name-field-title"><i class="fas fa-tag" style="color:#4a90d9;"></i> Nomes dos Arquivos de Saída</div>
+            <div class="name-field-grid">
+                <div class="form-group"><label>HTML</label><input type="text" id="customNameHtml" value="index"></div>
+                <div class="form-group"><label>CSS</label><input type="text" id="customNameCss" value="style"></div>
+                <div class="form-group"><label>JavaScript</label><input type="text" id="customNameJs" value="script"></div>
+            </div>
+        </div>
+
+        <div class="progress-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
+
+        <div class="file-info" id="fileInfo" style="display:none;">
+            <div class="name">
+                📎 <span id="fileName">arquivo.html</span>
+                <div class="batch-info">
+                    <span>📦 <span class="count" id="batchCount">0</span> arquivo(s)</span>
+                    <span>✅ <span class="count" id="processedCount">0</span> processado(s)</span>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-zip btn-sm" id="btnDownloadZip" title="Baixa TODOS os arquivos do lote em ZIP"><i class="fas fa-file-archive"></i> ZIP do Lote</button>
+                <button class="btn btn-purple btn-sm" id="btnPreview">👁️ Preview</button>
+                <button class="btn btn-success btn-sm" id="btnDownloadAll" title="Baixa os 3 arquivos (HTML+CSS+JS) do item ativo">📦 Baixar Atual</button>
+            </div>
+        </div>
+
+        <div class="batch-results" id="batchResults">
+            <div class="batch-header">
+                <h4>📋 Resultados do Processamento <span style="font-size:12px;font-weight:400;color:#94a3b8;">(clique em um item para ver no grid)</span></h4>
+                <div class="batch-active-info" id="batchActiveInfo"></div>
+            </div>
+            <div id="batchList"></div>
+        </div>
+
+        <div class="code-grid" id="codeGrid">
+            <div class="code-card">
+                <div class="header">
+                    <span class="badge badge-html">HTML</span>
+                    <span style="font-size:12px;color:#5b6f82;" id="htmlSize">0 caracteres</span>
+                </div>
+                <div class="body" id="htmlContent"><pre><span class="empty-message">Nenhum conteúdo HTML</span></pre></div>
+                <div class="footer">
+                    <span style="font-size:12px;color:#94a3b8;" id="htmlLines">0 linhas</span>
+                    <div class="actions-group">
+                        <button class="btn btn-primary btn-sm btn-download" data-type="html" disabled>⬇️ Baixar</button>
+                        <button class="btn btn-sm btn-preview-html" style="background:#f39c12;color:#fff;" disabled>👁️ Preview</button>
+                    </div>
+                </div>
+            </div>
+            <div class="code-card">
+                <div class="header">
+                    <span class="badge badge-css">CSS</span>
+                    <span style="font-size:12px;color:#5b6f82;" id="cssSize">0 caracteres</span>
+                </div>
+                <div class="body" id="cssContent"><pre><span class="empty-message">Nenhum conteúdo CSS</span></pre></div>
+                <div class="footer">
+                    <span style="font-size:12px;color:#94a3b8;" id="cssLines">0 linhas</span>
+                    <div class="actions-group">
+                        <button class="btn btn-primary btn-sm btn-download" data-type="css" disabled>⬇️ Baixar</button>
+                        <button class="btn btn-sm btn-preview-css" style="background:#f39c12;color:#fff;" disabled>👁️ Preview</button>
+                    </div>
+                </div>
+            </div>
+            <div class="code-card">
+                <div class="header">
+                    <span class="badge badge-js">JavaScript</span>
+                    <span style="font-size:12px;color:#5b6f82;" id="jsSize">0 caracteres</span>
+                </div>
+                <div class="body" id="jsContent"><pre><span class="empty-message">Nenhum conteúdo JavaScript</span></pre></div>
+                <div class="footer">
+                    <span style="font-size:12px;color:#94a3b8;" id="jsLines">0 linhas</span>
+                    <div class="actions-group">
+                        <button class="btn btn-primary btn-sm btn-download" data-type="js" disabled>⬇️ Baixar</button>
+                        <button class="btn btn-sm btn-preview-js" style="background:#f39c12;color:#fff;" disabled>👁️ Preview</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="previewTitle">👁️ Preview</h3>
+                <button class="modal-close" id="previewClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:none;" id="previewTextContainer">
+                    <pre style="font-family:monospace;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;" id="previewText"></pre>
+                </div>
+                <iframe id="previewFrame" sandbox="allow-scripts allow-modals"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+    (function () {
+        'use strict';
+        console.log('🚀 Separador PRO v2.2.3 inicializado');
+
+        var uploadArea = document.getElementById('uploadArea');
+        var fileInput = document.getElementById('fileInput');
+        var btnUpload = document.getElementById('btnUpload');
+        var fileInfo = document.getElementById('fileInfo');
+        var fileName = document.getElementById('fileName');
+        var batchCount = document.getElementById('batchCount');
+        var processedCount = document.getElementById('processedCount');
+        var batchResults = document.getElementById('batchResults');
+        var batchList = document.getElementById('batchList');
+        var batchActiveInfo = document.getElementById('batchActiveInfo');
+
+        var htmlContent = document.getElementById('htmlContent').querySelector('pre');
+        var cssContent = document.getElementById('cssContent').querySelector('pre');
+        var jsContent = document.getElementById('jsContent').querySelector('pre');
+        var htmlSize = document.getElementById('htmlSize');
+        var cssSize = document.getElementById('cssSize');
+        var jsSize = document.getElementById('jsSize');
+        var htmlLines = document.getElementById('htmlLines');
+        var cssLines = document.getElementById('cssLines');
+        var jsLines = document.getElementById('jsLines');
+
+        var btnClearAll = document.getElementById('btnClearAll');
+        var btnDownloadAll = document.getElementById('btnDownloadAll');
+        var btnDownloadZip = document.getElementById('btnDownloadZip');
+        var btnPreview = document.getElementById('btnPreview');
+        var btnToggleDebug = document.getElementById('btnToggleDebug');
+        var downloadBtns = document.querySelectorAll('.btn-download');
+        var previewBtns = document.querySelectorAll('.btn-preview-html, .btn-preview-css, .btn-preview-js');
+
+        var progressContainer = document.getElementById('progressContainer');
+        var progressBar = document.getElementById('progressBar');
+
+        var previewModal = document.getElementById('previewModal');
+        var previewClose = document.getElementById('previewClose');
+        var previewTitle = document.getElementById('previewTitle');
+        var previewFrame = document.getElementById('previewFrame');
+        var previewTextContainer = document.getElementById('previewTextContainer');
+        var previewText = document.getElementById('previewText');
+        var toast = document.getElementById('toast');
+
+        var optInsertLinks = document.getElementById('optInsertLinks');
+        var optPreserveExternal = document.getElementById('optPreserveExternal');
+        var optPreserveSpecialScripts = document.getElementById('optPreserveSpecialScripts');
+        var optMinify = document.getElementById('optMinify');
+        var optAddHeader = document.getElementById('optAddHeader');
+        var optFileName = document.getElementById('optFileName');
+        var nameFieldPanel = document.getElementById('nameFieldPanel');
+        var customNameHtml = document.getElementById('customNameHtml');
+        var customNameCss = document.getElementById('customNameCss');
+        var customNameJs = document.getElementById('customNameJs');
+
+        var extracted = { html: '', css: '', js: '', originalName: '', stats: {}, outputNames: {} };
+        var batchItems = [];
+        var activeBatchId = null;
+        var debugMode = localStorage.getItem('debugMode') === 'true';
+        var toastTimer = null;
+        var isProcessing = false;
+
+        function showToast(msg, type, duration) {
+            type = type || 'info'; duration = duration || 3000;
+            if (toastTimer) clearTimeout(toastTimer);
+            toast.textContent = msg;
+            toast.className = 'toast ' + type;
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            toastTimer = setTimeout(function () { toast.classList.remove('show'); }, duration);
+        }
+        function debug(msg, data) { if (debugMode) console.log('🐛 ' + msg, data || ''); }
+        function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function countLines(t) { return !t ? 0 : (t.match(/\n/g) || []).length + 1; }
+        function uid() { return 'b_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7); }
+
+        function sanitizeName(name, fallback) {
+            var s = String(name == null ? '' : name).trim()
+                .replace(/[\\/:*?"<>|]/g, '')
+                .replace(/\.+$/g, '')
+                .replace(/^\.+/g, '');
+            return s || fallback;
+        }
+
+        function isInTemplateOrNoscript(el) {
+            try {
+                return !!(el.closest('template') || el.closest('noscript'));
+            } catch (e) { return false; }
+        }
+
+        function minifyCSS(css) {
+            return css
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s*([{}:;,>+~])\s*/g, '$1')
+                .replace(/;}/g, '}')
+                .trim();
+        }
+
+        function minifyJS(js) {
+            var out = '', i = 0, len = js.length;
+            var lastWasSpace = true, prevNonSpace = '';
+            var wordChar = /[A-Za-z0-9_$]/;
+            while (i < len) {
+                var c = js[i], n = js[i + 1];
+                if (c === '/' && n === '/') { i += 2; while (i < len && js[i] !== '\n' && js[i] !== '\r') i++; continue; }
+                if (c === '/' && n === '*') { i += 2; while (i < len && !(js[i] === '*' && js[i + 1] === '/')) i++; i += 2; continue; }
+                if (c === '"' || c === "'" || c === '`') {
+                    var q = c; out += c; i++;
+                    while (i < len) {
+                        var ch = js[i];
+                        if (ch === '\\') { out += ch; i++; if (i < len) { out += js[i]; i++; } continue; }
+                        out += ch; i++;
+                        if (ch === q) break;
+                    }
+                    lastWasSpace = false; prevNonSpace = q; continue;
+                }
+                if (c === '/') {
+                    var canRegex = !prevNonSpace || '=([{,;:!&|?+-*%^~<>'.indexOf(prevNonSpace) >= 0;
+                    if (canRegex) {
+                        out += c; i++;
+                        var inClass = false;
+                        while (i < len) {
+                            var rc = js[i];
+                            if (rc === '\\') { out += rc; i++; if (i < len) { out += js[i]; i++; } continue; }
+                            if (rc === '[') inClass = true;
+                            else if (rc === ']') inClass = false;
+                            else if (rc === '/' && !inClass) { out += rc; i++; break; }
+                            else if (rc === '\n') break;
+                            out += rc; i++;
+                        }
+                        while (i < len && /[a-z]/i.test(js[i])) { out += js[i]; i++; }
+                        lastWasSpace = false; prevNonSpace = '/'; continue;
+                    }
+                }
+                if (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
+                    var j = i;
+                    while (j < len && (js[j] === ' ' || js[j] === '\t' || js[j] === '\n' || js[j] === '\r')) j++;
+                    var nextCh = js[j] || '', needSpace = false;
+                    if (wordChar.test(prevNonSpace) && wordChar.test(nextCh)) needSpace = true;
+                    if ((prevNonSpace === '+' && nextCh === '+') || (prevNonSpace === '-' && nextCh === '-')) needSpace = true;
+                    if (needSpace && !lastWasSpace && out.length > 0) { out += ' '; lastWasSpace = true; }
+                    i = j; continue;
+                }
+                out += c; lastWasSpace = false; prevNonSpace = c; i++;
+            }
+            return out.trim();
+        }
+
+        function addFileHeader(content, type, originalName) {
+            var date = new Date().toLocaleString('pt-BR');
+            var open = { html: '<!--', css: '/*', js: '/*' }[type];
+            var close = { html: '-->', css: '*/', js: '*/' }[type];
+            var label = type === 'html' ? 'HTML' : type === 'css' ? 'CSS' : 'JavaScript';
+            return open + '\n * ' + label + ' extraído automaticamente\n * Arquivo original: ' + originalName + '\n * Data: ' + date + '\n * Separador PRO v2.2.3\n ' + close + '\n\n' + content;
+        }
+
+        function updateUI() {
+            setGrid('html', htmlContent, htmlSize, htmlLines);
+            setGrid('css', cssContent, cssSize, cssLines);
+            setGrid('js', jsContent, jsSize, jsLines);
+
+            downloadBtns.forEach(function (btn) {
+                var t = btn.getAttribute('data-type');
+                btn.disabled = !(extracted[t] && extracted[t].trim().length > 0);
+            });
+            previewBtns.forEach(function (btn) {
+                var t = btn.classList.contains('btn-preview-html') ? 'html'
+                      : btn.classList.contains('btn-preview-css') ? 'css' : 'js';
+                btn.disabled = !(extracted[t] && extracted[t].trim().length > 0);
+            });
+
+            var hasAny = (extracted.html && extracted.html.trim()) || (extracted.css && extracted.css.trim()) || (extracted.js && extracted.js.trim());
+            btnDownloadAll.disabled = !hasAny;
+            btnPreview.disabled = !hasAny;
+
+            var successful = batchItems.filter(function (x) { return x.success; });
+            btnDownloadZip.disabled = successful.length === 0;
+
+            if (activeBatchId) {
+                var item = batchItems.find(function (x) { return x.id === activeBatchId; });
+                if (item) batchActiveInfo.innerHTML = 'Ativo: <strong>' + escapeHtml(item.filename) + '</strong>';
+            } else {
+                batchActiveInfo.innerHTML = '';
+            }
+        }
+
+        function setGrid(type, pre, sizeEl, linesEl) {
+            var v = extracted[type];
+            if (v && v.trim()) {
+                pre.innerHTML = '<code>' + escapeHtml(v) + '</code>';
+                sizeEl.textContent = v.length + ' caracteres';
+                linesEl.textContent = countLines(v) + ' linhas';
+            } else {
+                pre.innerHTML = '<span class="empty-message">Nenhum conteúdo ' + type.toUpperCase() + '</span>';
+                sizeEl.textContent = '0 caracteres';
+                linesEl.textContent = '0 linhas';
+            }
+        }
+
+        function renderBatchList() {
+            if (batchItems.length === 0) {
+                batchList.innerHTML = '<div style="padding:12px;color:#94a3b8;text-align:center;">Nenhum item processado.</div>';
+                return;
+            }
+            var html = '';
+            batchItems.forEach(function (item) {
+                var cls = 'batch-item';
+                if (item.id === activeBatchId) cls += ' active';
+                if (!item.success) cls += ' failed';
+
+                var statusHtml = '';
+                if (item.success) {
+                    var s = item.result.stats || {};
+                    statusHtml += '<span class="success">✅ CSS: ' + item.result.css.length + ' | JS: ' + item.result.js.length + '</span>';
+                    if (s.externalScripts) statusHtml += '<span class="info-tag">🔗 ' + s.externalScripts + ' ext</span>';
+                    if (s.specialScripts) statusHtml += '<span class="info-tag">📋 ' + s.specialScripts + ' esp</span>';
+                    if (s.mediaQueries) statusHtml += '<span class="info-tag">📱 ' + s.mediaQueries + ' media</span>';
+                } else {
+                    statusHtml = '<span class="error">❌ ' + escapeHtml(item.error || 'Erro') + '</span>';
+                }
+
+                var actions = '';
+                if (item.success) {
+                    actions = '<div class="batch-item-actions">' +
+                        '<button class="mini-btn" data-load="' + item.id + '" title="Ver no grid">👁️</button>' +
+                        '<button class="mini-btn" data-zip="' + item.id + '" title="Baixar só este como ZIP">📦</button>' +
+                        '<button class="mini-btn danger" data-remove="' + item.id + '" title="Remover">✕</button>' +
+                        '</div>';
+                } else {
+                    actions = '<div class="batch-item-actions">' +
+                        '<button class="mini-btn danger" data-remove="' + item.id + '" title="Remover">✕</button>' +
+                        '</div>';
+                }
+
+                html += '<div class="' + cls + '" data-id="' + item.id + '">' +
+                    '<div class="batch-item-main">' +
+                        '<span class="batch-item-name">📄 ' + escapeHtml(item.filename) + '</span>' +
+                        '<div class="status">' + statusHtml + '</div>' +
+                    '</div>' + actions +
+                '</div>';
+            });
+            batchList.innerHTML = html;
+
+            batchList.querySelectorAll('.batch-item:not(.failed)').forEach(function (el) {
+                el.addEventListener('click', function (e) {
+                    if (e.target.closest('.batch-item-actions')) return;
+                    loadBatchItem(el.dataset.id);
+                });
+            });
+            batchList.querySelectorAll('[data-load]').forEach(function (b) {
+                b.addEventListener('click', function (e) { e.stopPropagation(); loadBatchItem(b.dataset.load); });
+            });
+            batchList.querySelectorAll('[data-zip]').forEach(function (b) {
+                b.addEventListener('click', function (e) { e.stopPropagation(); downloadSingleZip(b.dataset.zip); });
+            });
+            batchList.querySelectorAll('[data-remove]').forEach(function (b) {
+                b.addEventListener('click', function (e) { e.stopPropagation(); removeBatchItem(b.dataset.remove); });
+            });
+        }
+
+        function loadBatchItem(id) {
+            var item = batchItems.find(function (x) { return x.id === id; });
+            if (!item || !item.success) return;
+            activeBatchId = id;
+            extracted.html = item.result.html;
+            extracted.css = item.result.css;
+            extracted.js = item.result.js;
+            extracted.originalName = item.result.originalName;
+            extracted.stats = item.result.stats;
+            extracted.outputNames = item.result.outputNames || {};
+            updateUI();
+            renderBatchList();
+        }
+
+        function removeBatchItem(id) {
+            var idx = batchItems.findIndex(function (x) { return x.id === id; });
+            if (idx < 0) return;
+            var wasActive = (activeBatchId === id);
+            batchItems.splice(idx, 1);
+            processedCount.textContent = batchItems.filter(function (x) { return x.success; }).length;
+            batchCount.textContent = batchItems.length;
+
+            if (wasActive) {
+                activeBatchId = null;
+                extracted = { html:'', css:'', js:'', originalName:'', stats:{}, outputNames:{} };
+                var next = batchItems.find(function (x) { return x.success; });
+                if (next) loadBatchItem(next.id); else updateUI();
+            }
+            renderBatchList();
+            updateUI();
+            if (batchItems.length === 0) {
+                fileInfo.style.display = 'none';
+                batchResults.classList.remove('show');
+            }
+            showToast('🗑️ Item removido do lote', 'info', 2000);
+        }
+
+        function processHTMLFile(content, filename) {
+            debug('Processando:', filename);
+            content = content.replace(/^\uFEFF/, '');
+
+            var doctypeMatch = content.match(/<!DOCTYPE[^>]+>/i);
+            var doctype = doctypeMatch ? doctypeMatch[0] : '<!DOCTYPE html>';
+
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(content, 'text/html');
+            var perr = doc.querySelector('parsererror');
+            if (perr) throw new Error('Erro ao parsear HTML: ' + perr.textContent);
+
+            var cssBlocks = [], jsBlocks = [];
+            var stats = { externalScripts: 0, specialScripts: 0, mediaQueries: 0 };
+
+            doc.querySelectorAll('style').forEach(function (tag) {
+                if (isInTemplateOrNoscript(tag)) return;
+                var css = tag.textContent, media = tag.getAttribute('media');
+                if (css && css.trim()) {
+                    if (media && media !== 'all' && media !== 'screen') {
+                        cssBlocks.push('@media ' + media + ' {\n' + css.trim() + '\n}');
+                        stats.mediaQueries++;
+                    } else if (media === 'screen') {
+                        cssBlocks.push('@media screen {\n' + css.trim() + '\n}');
+                        stats.mediaQueries++;
+                    } else {
+                        cssBlocks.push(css.trim());
+                    }
+                }
+                tag.remove();
+            });
+
+            doc.querySelectorAll('script').forEach(function (tag) {
+                if (isInTemplateOrNoscript(tag)) return;
+                var src = tag.getAttribute('src');
+                var type = tag.getAttribute('type');
+                if (src) {
+                    stats.externalScripts++;
+                    if (!optPreserveExternal.checked) tag.remove();
+                    return;
+                }
+                if (type && type !== 'text/javascript' && type !== 'module' && type !== 'application/javascript') {
+                    stats.specialScripts++;
+                    if (!optPreserveSpecialScripts.checked) tag.remove();
+                    return;
+                }
+                var c = tag.textContent;
+                if (c && c.trim()) jsBlocks.push(c.trim());
+                tag.remove();
+            });
+
+            var html = doctype + '\n' + doc.documentElement.outerHTML;
+            var css = cssBlocks.join('\n\n');
+
+            var js = jsBlocks.map(function (b, i) { return i === 0 ? b : ';\n' + b; }).join('\n\n');
+            if (css && !/\n$/.test(css)) css += '\n';
+            if (js && !/\n$/.test(js)) js += '\n';
+
+            var useCustom = optFileName.checked;
+            var baseOriginal = filename.replace(/\.html?$/i, '');
+            var outputNames;
+            if (useCustom) {
+                outputNames = {
+                    html: sanitizeName(customNameHtml.value, 'index') + '.html',
+                    css:  sanitizeName(customNameCss.value,  'style') + '.css',
+                    js:   sanitizeName(customNameJs.value,   'script') + '.js'
+                };
+            } else {
+                outputNames = {
+                    html: sanitizeName(baseOriginal, 'index') + '.html',
+                    css:  sanitizeName(baseOriginal, 'index') + '.css',
+                    js:   sanitizeName(baseOriginal, 'index') + '.js'
+                };
+            }
+
+            var hasCss = css && css.trim().length > 0;
+            var hasJs  = js  && js.trim().length > 0;
+
+            if (optInsertLinks.checked && (hasCss || hasJs)) {
+                var hd = parser.parseFromString(html, 'text/html');
+                if (hasCss) {
+                    var head = hd.querySelector('head');
+                    if (head && !head.querySelector('link[href="' + outputNames.css + '"]')) {
+                        var linkCss = hd.createElement('link');
+                        linkCss.rel = 'stylesheet';
+                        linkCss.href = outputNames.css;
+                        var lastStyle = head.querySelector('link[rel="stylesheet"]:last-of-type, style:last-of-type');
+                        if (lastStyle) lastStyle.insertAdjacentElement('afterend', linkCss);
+                        else {
+                            var t = head.querySelector('title');
+                            if (t) t.insertAdjacentElement('afterend', linkCss);
+                            else head.insertBefore(linkCss, head.firstChild);
+                        }
+                    }
+                }
+                if (hasJs) {
+                    var body = hd.querySelector('body');
+                    if (body && !body.querySelector('script[src="' + outputNames.js + '"]')) {
+                        var s = hd.createElement('script');
+                        s.src = outputNames.js;
+                        body.appendChild(s);
+                    }
+                }
+                html = doctype + '\n' + hd.documentElement.outerHTML;
+            }
+
+            if (optMinify.checked) {
+                if (css) css = minifyCSS(css);
+                if (js) js = minifyJS(js);
+            }
+            if (optAddHeader.checked) {
+                if (html) html = addFileHeader(html, 'html', filename);
+                if (css) css = addFileHeader(css, 'css', filename);
+                if (js) js = addFileHeader(js, 'js', filename);
+            }
+
+            return {
+                html: html, css: css, js: js,
+                originalName: filename.replace(/\.html?$/i, ''),
+                stats: stats,
+                outputNames: outputNames
+            };
+        }
+
+        function handleFiles(files) {
+            if (isProcessing) { showToast('⚠️ Aguarde o processamento atual terminar.', 'warning'); return; }
+            if (!files || !files.length) { showToast('❌ Nenhum arquivo.', 'error'); return; }
+            var valid = Array.prototype.filter.call(files, function (f) {
+                return ['html', 'htm'].indexOf((f.name.split('.').pop() || '').toLowerCase()) >= 0;
+            });
+            if (!valid.length) { showToast('❌ Nenhum HTML válido.', 'error'); return; }
+
+            isProcessing = true;
+            batchItems = [];
+            activeBatchId = null;
+            extracted = { html:'', css:'', js:'', originalName:'', stats:{}, outputNames:{} };
+            batchList.innerHTML = '';
+            fileInfo.style.display = 'flex';
+            fileName.textContent = valid.length + ' arquivo(s)';
+            batchCount.textContent = valid.length;
+            processedCount.textContent = '0';
+            progressContainer.classList.add('show');
+            progressBar.style.width = '0%';
+
+            var processed = 0, total = valid.length;
+
+            function next(idx) {
+                if (idx >= valid.length) {
+                    progressBar.style.width = '100%';
+                    setTimeout(function () { progressContainer.classList.remove('show'); }, 500);
+                    renderBatchList();
+                    updateUI();
+                    var firstOk = batchItems.find(function (x) { return x.success; });
+                    if (firstOk) loadBatchItem(firstOk.id);
+                    var okCount = batchItems.filter(function (x) { return x.success; }).length;
+                    var failCount = total - okCount;
+                    var msg = '✅ ' + okCount + ' arquivo(s) processado(s)!';
+                    if (failCount) msg += ' ⚠️ ' + failCount + ' falhou/falharam.';
+                    showToast(msg, failCount ? 'warning' : 'success', 4000);
+                    isProcessing = false;
+                    return;
+                }
+                var file = valid[idx];
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var item = { id: uid(), filename: file.name };
+                    try {
+                        item.result = processHTMLFile(e.target.result, file.name);
+                        item.success = true;
+                    } catch (err) {
+                        item.success = false;
+                        item.error = err.message;
+                        debug('Erro:', err);
+                    }
+                    batchItems.push(item);
+                    processed++;
+                    processedCount.textContent = batchItems.filter(function (x) { return x.success; }).length;
+                    progressBar.style.width = (processed / total * 100) + '%';
+                    next(idx + 1);
+                };
+                reader.onerror = function () {
+                    batchItems.push({ id: uid(), filename: file.name, success: false, error: 'Erro ao ler arquivo' });
+                    processed++;
+                    processedCount.textContent = batchItems.filter(function (x) { return x.success; }).length;
+                    progressBar.style.width = (processed / total * 100) + '%';
+                    next(idx + 1);
+                };
+                reader.readAsText(file, 'UTF-8');
+            }
+
+            next(0);
+            batchResults.classList.add('show');
+            showToast('📦 Processando ' + total + ' arquivo(s)...', 'info', 2000);
+        }
+
+        function getOutputNames() {
+            return extracted.outputNames && extracted.outputNames.html
+                ? extracted.outputNames
+                : { html: 'index.html', css: 'style.css', js: 'script.js' };
+        }
+
+        function buildPreviewHTML() {
+            var html = extracted.html || '';
+            var css = extracted.css || '';
+            var js = extracted.js || '';
+            if (!css && !js) return html;
+            try {
+                var names = getOutputNames();
+                var doc = new DOMParser().parseFromString(html, 'text/html');
+
+                doc.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
+                    var h = l.getAttribute('href') || '';
+                    var isExternal = /^(https?:)?\/\//i.test(h) || /^(data|blob):/i.test(h);
+                    if (h === names.css || (!isExternal && /\.css$/i.test(h))) l.remove();
+                });
+                doc.querySelectorAll('script[src]').forEach(function (s) {
+                    var sr = s.getAttribute('src') || '';
+                    var isExternal = /^(https?:)?\/\//i.test(sr) || /^(data|blob):/i.test(sr);
+                    if (sr === names.js || (!isExternal && /\.js$/i.test(sr))) s.remove();
+                });
+
+                if (css) {
+                    var st = doc.createElement('style');
+                    st.textContent = css;
+                    var hd = doc.querySelector('head');
+                    if (hd) hd.appendChild(st);
+                }
+                if (js) {
+                    var sc = doc.createElement('script');
+                    // ✅ FIX v2.2.3 — quebra a sequência de fechamento em fonte para não ser interpretada pelo parser HTML.
+                    //    'split'/'join' com '</' + 'script' evita o literal proibido no código-fonte.
+                    sc.textContent = js.split('</' + 'script').join('<\\/script');
+                    var bd = doc.querySelector('body');
+                    if (bd) bd.appendChild(sc);
+                    else doc.documentElement.appendChild(sc);
+                }
+                return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+            } catch (e) { return html; }
+        }
+
+        function showPreview(type) {
+            var content = extracted[type];
+            var names = getOutputNames();
+            if (!content || !content.trim()) { showToast('⚠️ Conteúdo vazio.', 'warning'); return; }
+            previewTitle.textContent = '👁️ Preview - ' + type.toUpperCase() + ' (' + names[type] + ')';
+            if (type === 'html') {
+                previewTextContainer.style.display = 'none';
+                previewFrame.style.display = 'block';
+                previewFrame.srcdoc = buildPreviewHTML();
+            } else {
+                previewFrame.style.display = 'none';
+                previewTextContainer.style.display = 'block';
+                previewText.textContent = content;
+            }
+            previewModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closePreview() {
+            previewModal.classList.remove('show');
+            document.body.style.overflow = '';
+            previewFrame.srcdoc = '';
+        }
+
+        function downloadFile(content, filename) {
+            if (!content || !content.trim()) { showToast('⚠️ Conteúdo vazio.', 'error'); return; }
+            var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(function () { URL.revokeObjectURL(url); }, 100);
+        }
+
+        function downloadCurrent() {
+            var names = getOutputNames();
+            var files = [];
+            if (extracted.html && extracted.html.trim()) files.push([extracted.html, names.html]);
+            if (extracted.css && extracted.css.trim()) files.push([extracted.css, names.css]);
+            if (extracted.js && extracted.js.trim()) files.push([extracted.js, names.js]);
+            if (!files.length) { showToast('⚠️ Nada para baixar.', 'error'); return; }
+            files.forEach(function (f, i) {
+                setTimeout(function () { downloadFile(f[0], f[1]); }, i * 250);
+            });
+            showToast('📦 ' + files.length + ' arquivo(s) baixado(s)!', 'success');
+        }
+
+        function downloadBatchZip() {
+            if (typeof JSZip === 'undefined') { showToast('❌ JSZip não carregado.', 'error'); return; }
+            var ok = batchItems.filter(function (x) { return x.success; });
+            if (!ok.length) { showToast('⚠️ Nenhum item válido no lote.', 'error'); return; }
+            var zip = new JSZip();
+            ok.forEach(function (item) {
+                var r = item.result;
+                var folderName = r.originalName || 'arquivo';
+                var folder = zip.folder(folderName);
+                var names = r.outputNames || {
+                    html: folderName + '.html',
+                    css:  'style.css',
+                    js:   'script.js'
+                };
+                if (r.html) folder.file(names.html, r.html);
+                if (r.css)  folder.file(names.css,  r.css);
+                if (r.js)   folder.file(names.js,   r.js);
+            });
+            var zipName = (ok.length === 1 ? ok[0].result.originalName : 'lote_' + ok.length + '_arquivos') + '.zip';
+            showToast('📦 Gerando ZIP (' + ok.length + ' item(s))...', 'info', 2000);
+            zip.generateAsync({ type: 'blob', compression: 'DEFLATE' })
+                .then(function (blob) {
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url; a.download = zipName;
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    setTimeout(function () { URL.revokeObjectURL(url); }, 100);
+                    showToast('✅ ZIP: ' + zipName, 'success');
+                })
+                .catch(function (e) { showToast('❌ Erro ZIP: ' + e.message, 'error'); });
+        }
+
+        function downloadSingleZip(id) {
+            if (typeof JSZip === 'undefined') { showToast('❌ JSZip não carregado.', 'error'); return; }
+            var item = batchItems.find(function (x) { return x.id === id; });
+            if (!item || !item.success) return;
+            var r = item.result;
+            var zip = new JSZip();
+            var names = r.outputNames || {
+                html: (r.originalName || 'index') + '.html',
+                css:  'style.css',
+                js:   'script.js'
+            };
+            if (r.html) zip.file(names.html, r.html);
+            if (r.css)  zip.file(names.css,  r.css);
+            if (r.js)   zip.file(names.js,   r.js);
+            zip.generateAsync({ type: 'blob' }).then(function (blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url; a.download = (r.originalName || 'arquivo') + '.zip';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                setTimeout(function () { URL.revokeObjectURL(url); }, 100);
+                showToast('✅ ' + (r.originalName || 'arquivo') + '.zip', 'success');
+            });
+        }
+
+        function clearAll() {
+            if (isProcessing) { showToast('⚠️ Aguarde o processamento atual terminar.', 'warning'); return; }
+            extracted = { html:'', css:'', js:'', originalName:'', stats:{}, outputNames:{} };
+            batchItems = [];
+            activeBatchId = null;
+            fileInput.value = '';
+            batchList.innerHTML = '';
+            batchResults.classList.remove('show');
+            fileInfo.style.display = 'none';
+            progressContainer.classList.remove('show');
+            progressBar.style.width = '0%';
+            batchCount.textContent = '0';
+            processedCount.textContent = '0';
+            fileName.textContent = 'arquivo.html';
+            updateUI();
+            showToast('🧹 Limpo!', 'info');
+        }
+
+        btnUpload.addEventListener('click', function (e) { e.preventDefault(); fileInput.click(); });
+        uploadArea.addEventListener('click', function (e) { if (e.target.tagName !== 'INPUT') fileInput.click(); });
+        fileInput.addEventListener('change', function () { if (fileInput.files.length) handleFiles(fileInput.files); fileInput.value = ''; });
+        uploadArea.addEventListener('dragover', function (e) { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', function (e) { e.preventDefault(); uploadArea.classList.remove('dragover'); });
+        uploadArea.addEventListener('drop', function (e) { e.preventDefault(); uploadArea.classList.remove('dragover'); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+
+        downloadBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var t = this.getAttribute('data-type');
+                var names = getOutputNames();
+                downloadFile(extracted[t], names[t]);
+                showToast('✅ ' + names[t] + ' baixado!', 'success');
+            });
+        });
+        document.querySelectorAll('.btn-preview-html').forEach(function (b) { b.addEventListener('click', function () { showPreview('html'); }); });
+        document.querySelectorAll('.btn-preview-css').forEach(function (b) { b.addEventListener('click', function () { showPreview('css'); }); });
+        document.querySelectorAll('.btn-preview-js').forEach(function (b) { b.addEventListener('click', function () { showPreview('js'); }); });
+
+        btnPreview.addEventListener('click', function () { showPreview('html'); });
+        previewClose.addEventListener('click', closePreview);
+        previewModal.addEventListener('click', function (e) { if (e.target === previewModal) closePreview(); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && previewModal.classList.contains('show')) closePreview();
+        });
+
+        btnDownloadAll.addEventListener('click', downloadCurrent);
+        btnDownloadZip.addEventListener('click', downloadBatchZip);
+        btnClearAll.addEventListener('click', clearAll);
+
+        btnToggleDebug.addEventListener('click', function () {
+            debugMode = !debugMode;
+            localStorage.setItem('debugMode', JSON.stringify(debugMode));
+            this.textContent = debugMode ? '🐛 Debug ON' : '🐛 Debug OFF';
+            this.style.background = debugMode ? '#27ae60' : '#9b59b6';
+            showToast('🔍 Debug ' + (debugMode ? 'ativado' : 'desativado'), 'info');
+        });
+        if (debugMode) { btnToggleDebug.textContent = '🐛 Debug ON'; btnToggleDebug.style.background = '#27ae60'; }
+
+        optFileName.addEventListener('change', function () {
+            nameFieldPanel.style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 'o') { e.preventDefault(); fileInput.click(); }
+            if (e.ctrlKey && e.key === 'd') { e.preventDefault(); if (!btnDownloadAll.disabled) downloadCurrent(); }
+            if (e.ctrlKey && e.shiftKey && e.key === 'Z') { e.preventDefault(); if (!btnDownloadZip.disabled) downloadBatchZip(); }
+            if (e.key === 'Escape' && !previewModal.classList.contains('show')) clearAll();
+        });
+
+        updateUI();
+        showToast('💡 PRO v2.2.3 — script quebrado corrigido!', 'info', 5000);
+        console.log('✅ Separador PRO v2.2.3 pronto!');
+    })();
+    </script>
+
+</body>
+</html>
